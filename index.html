@@ -3,213 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giáo Viên Tiếng Anh Ảo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+    <title>English Teacher - Save Audio</title>
     <style>
         :root {
-            --edu-blue: #2c3e50;
-            --accent-gold: #f39c12;
-            --light-bg: #ecf0f1;
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --bg: #f8fafc;
         }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            font-family: -apple-system, sans-serif;
+            background: var(--bg);
+            display: flex; justify-content: center; padding: 20px; margin: 0;
         }
-
-        .teacher-card {
-            background: white;
-            width: 100%;
-            max-width: 550px;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border-top: 8px solid var(--edu-blue);
+        .app-container {
+            background: white; width: 100%; max-width: 500px;
+            padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-
-        h2 { color: var(--edu-blue); text-align: center; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #7f8c8d; font-size: 14px; margin-bottom: 25px; }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; color: #34495e; font-size: 14px; }
-
+        h2 { color: var(--primary); text-align: center; margin-bottom: 5px; }
+        p.desc { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 20px; }
+        
         textarea {
-            width: 100%;
-            height: 150px;
-            padding: 15px;
-            border: 2px solid #dcdde1;
-            border-radius: 12px;
-            resize: none;
-            font-size: 16px;
-            box-sizing: border-box;
-            transition: 0.3s;
+            width: 100%; height: 150px; padding: 15px; border: 2px solid #e2e8f0;
+            border-radius: 15px; font-size: 16px; box-sizing: border-box; outline: none;
+            transition: 0.3s; background: #fcfcfc;
         }
+        textarea:focus { border-color: var(--primary); background: white; }
 
-        textarea:focus { border-color: var(--edu-blue); outline: none; }
-
-        .settings-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+        .config {
+            margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
         }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #475569; }
+        select, input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; }
 
-        select, input[type="range"] {
-            width: 100%;
-            cursor: pointer;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-        }
-
+        .actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        
         button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            padding: 15px; border: none; border-radius: 12px; font-weight: bold;
+            font-size: 16px; cursor: pointer; transition: 0.2s; display: flex;
+            align-items: center; justify-content: center; gap: 8px;
         }
+        .btn-play { background: var(--primary); color: white; }
+        .btn-download { background: var(--secondary); color: white; display: none; }
+        button:active { transform: scale(0.98); }
 
-        .btn-play { background: var(--edu-blue); color: white; }
-        .btn-play:hover { background: #34495e; }
-
-        .btn-download { background: #27ae60; color: white; display: none; }
-
-        #visualizer {
-            text-align: center;
-            height: 20px;
-            margin: 10px 0;
-            font-weight: bold;
-            color: var(--accent-gold);
-        }
+        #status { text-align: center; font-size: 13px; margin-top: 10px; color: var(--primary); font-weight: 500; }
     </style>
 </head>
 <body>
 
-<div class="teacher-card">
-    <h2>Luyện Đọc Tiếng Anh</h2>
-    <p class="subtitle">Giọng đọc chuẩn sư phạm (US/UK)</p>
+<div class="app-container">
+    <h2>Teacher Amy 👩‍🏫</h2>
+    <p class="desc">Nhập văn bản, nghe và tải bài giảng về máy</p>
 
-    <div class="form-group">
-        <label>Nội dung bài học:</label>
-        <textarea id="text-input" placeholder="Dán đoạn văn tiếng Anh vào đây..."></textarea>
-    </div>
+    <textarea id="input-text" placeholder="Paste your English text here..."></textarea>
 
-    <div class="settings-grid">
-        <div class="form-group">
-            <label>Chọn giọng giáo viên:</label>
-            <select id="voice-select">
-                <option value="">Đang tải giọng đọc...</option>
-            </select>
+    <div class="config">
+        <div>
+            <label>Giọng đọc</label>
+            <select id="voice-list"></select>
         </div>
-        <div class="form-group">
-            <label>Tốc độ giảng bài:</label>
+        <div>
+            <label>Tốc độ (0.9 là chuẩn)</label>
             <input type="range" id="rate" min="0.5" max="1.5" value="0.9" step="0.1">
         </div>
     </div>
 
-    <div id="visualizer"></div>
+    <div id="status">Sẵn sàng</div>
 
-    <div class="btn-group">
-        <button id="btn-speak" class="btn-play">
-            <span>▶</span> Bắt đầu giảng
-        </button>
-        <button id="btn-download" class="btn-download">
-            <span>⬇</span> Tải bài giảng (.wav)
-        </button>
+    <div class="actions">
+        <button id="play-btn" class="btn-play">🔊 Bắt đầu đọc</button>
+        <button id="download-btn" class="btn-download">📥 Tải file Audio về điện thoại</button>
     </div>
 </div>
 
 <script>
     const synth = window.speechSynthesis;
-    const voiceSelect = document.getElementById('voice-select');
-    const textInput = document.getElementById('text-input');
-    const btnSpeak = document.getElementById('btn-speak');
-    const btnDownload = document.getElementById('btn-download');
-    const rateInput = document.getElementById('rate');
-    const visualizer = document.getElementById('visualizer');
+    const playBtn = document.getElementById('play-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const voiceList = document.getElementById('voice-list');
+    const inputText = document.getElementById('input-text');
+    const rate = document.getElementById('rate');
+    const status = document.getElementById('status');
 
     let voices = [];
 
-    // Tải danh sách giọng đọc từ hệ thống
-    function loadVoices() {
+    // Lấy danh sách giọng đọc chất lượng cao
+    function getVoices() {
         voices = synth.getVoices();
-        voiceSelect.innerHTML = '';
-        
-        // Ưu tiên các giọng tiếng Anh (en)
-        voices.filter(v => v.lang.includes('en')).forEach(voice => {
-            const option = document.createElement('option');
-            option.textContent = `${voice.name} (${voice.lang})`;
-            option.value = voice.name;
-            if(voice.name.includes('Google') || voice.name.includes('Natural')) {
-                option.selected = true; // Chọn giọng Google chất lượng cao làm mặc định
-            }
-            voiceSelect.appendChild(option);
-        });
+        voiceList.innerHTML = voices
+            .filter(v => v.lang.includes('en'))
+            .map(v => `<option value="${v.name}">${v.name} (${v.lang})</option>`)
+            .join('');
     }
 
     if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
+        speechSynthesis.onvoiceschanged = getVoices;
     }
 
-    btnSpeak.onclick = () => {
-        if (synth.speaking) {
-            synth.cancel();
-            visualizer.innerText = "";
-            btnSpeak.innerHTML = "<span>▶</span> Tiếp tục giảng";
-            return;
-        }
+    playBtn.addEventListener('click', () => {
+        if (inputText.value.trim() === "") return alert("Hãy nhập văn bản!");
 
-        if (textInput.value !== "") {
-            const utterThis = new SpeechSynthesisUtterance(textInput.value);
-            const selectedVoice = voices.find(v => v.name === voiceSelect.value);
+        const utterance = new SpeechSynthesisUtterance(inputText.value);
+        utterance.voice = voices.find(v => v.name === voiceList.value);
+        utterance.rate = rate.value;
+
+        utterance.onstart = () => {
+            status.innerText = "正在 đọc... (Vui lòng nghe hết để tạo file)";
+            playBtn.disabled = true;
+            playBtn.style.opacity = "0.5";
+        };
+
+        utterance.onend = () => {
+            status.innerText = "✅ Đã xong! Bạn có thể tải file.";
+            playBtn.disabled = false;
+            playBtn.style.opacity = "1";
             
-            utterThis.voice = selectedVoice;
-            utterThis.rate = rateInput.value;
-            utterThis.pitch = 1.0;
-
-            utterThis.onstart = () => {
-                visualizer.innerText = "🔊 Giáo viên đang đọc...";
-                btnSpeak.innerHTML = "<span>⏹</span> Dừng lại";
-                btnDownload.style.display = "none";
+            // Hiển thị nút tải về
+            downloadBtn.style.display = "flex";
+            
+            // Kỹ thuật tải về: Sử dụng API của Google để lấy file mp3 thật
+            const textToDownload = encodeURIComponent(inputText.value);
+            const downloadUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${textToDownload}&tl=en&client=tw-ob`;
+            
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.target = "_blank";
+                link.download = "english_lesson.mp3";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             };
+        };
 
-            utterThis.onend = () => {
-                visualizer.innerText = "✅ Hoàn thành bài học";
-                btnSpeak.innerHTML = "<span>▶</span> Giảng lại";
-                btnDownload.style.display = "flex";
-            };
+        synth.speak(utterance);
+    });
 
-            synth.speak(utterThis);
-        }
-    };
-
-    // Chức năng tải về (Giả lập thông qua ghi âm luồng - Browser Limited)
-    btnDownload.onclick = () => {
-        const text = textInput.value;
-        const blob = new Blob([text], { type: 'audio/wav' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'bai-giang-tieng-anh.wav';
-        a.click();
-    };
-
-    loadVoices();
+    getVoices();
 </script>
-
 </body>
 </html>
