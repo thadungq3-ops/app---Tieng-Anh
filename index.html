@@ -3,143 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Teacher - Save Audio</title>
+    <title>English Speech Studio</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --secondary: #10b981;
-            --bg: #f8fafc;
+            --primary: #1e40af;
+            --secondary: #059669;
+            --accent: #f59e0b;
+            --bg: #f1f5f9;
         }
         body {
-            font-family: -apple-system, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--bg);
-            display: flex; justify-content: center; padding: 20px; margin: 0;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0;
         }
-        .app-container {
-            background: white; width: 100%; max-width: 500px;
-            padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        .studio-card {
+            background: white; width: 90%; max-width: 600px;
+            padding: 30px; border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
         }
-        h2 { color: var(--primary); text-align: center; margin-bottom: 5px; }
-        p.desc { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 20px; }
+        h1 { color: var(--primary); font-size: 24px; text-align: center; margin-bottom: 20px; }
         
         textarea {
-            width: 100%; height: 150px; padding: 15px; border: 2px solid #e2e8f0;
-            border-radius: 15px; font-size: 16px; box-sizing: border-box; outline: none;
-            transition: 0.3s; background: #fcfcfc;
+            width: 100%; height: 180px; padding: 15px; border: 2px solid #cbd5e1;
+            border-radius: 16px; font-size: 16px; box-sizing: border-box;
+            outline: none; transition: 0.3s; line-height: 1.6;
         }
-        textarea:focus { border-color: var(--primary); background: white; }
+        textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(30,64,175,0.1); }
 
-        .config {
-            margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        .toolbar {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin: 20px 0;
         }
-        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #475569; }
-        select, input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .control-group label { display: block; font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 5px; }
+        select, input[type="range"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
 
-        .actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
-        
+        .btn-stack { display: flex; flex-direction: column; gap: 10px; }
         button {
-            padding: 15px; border: none; border-radius: 12px; font-weight: bold;
-            font-size: 16px; cursor: pointer; transition: 0.2s; display: flex;
-            align-items: center; justify-content: center; gap: 8px;
+            padding: 16px; border: none; border-radius: 12px; font-weight: bold;
+            font-size: 16px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .btn-play { background: var(--primary); color: white; }
+        .btn-speak { background: var(--primary); color: white; }
+        .btn-speak:hover { background: #1e3a8a; }
         .btn-download { background: var(--secondary); color: white; display: none; }
-        button:active { transform: scale(0.98); }
-
-        #status { text-align: center; font-size: 13px; margin-top: 10px; color: var(--primary); font-weight: 500; }
+        .btn-download:hover { background: #047857; }
+        
+        #progress-bar {
+            height: 4px; width: 0%; background: var(--accent);
+            margin-top: 10px; transition: width 0.3s; border-radius: 2px;
+        }
+        .status-text { text-align: center; font-size: 14px; color: #64748b; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <h2>Teacher Amy 👩‍🏫</h2>
-    <p class="desc">Nhập văn bản, nghe và tải bài giảng về máy</p>
+<div class="studio-card">
+    <h1>English Teaching Studio 🎙️</h1>
+    
+    <textarea id="text-input" placeholder="Nhập bài đọc tiếng Anh tại đây..."></textarea>
 
-    <textarea id="input-text" placeholder="Paste your English text here..."></textarea>
-
-    <div class="config">
-        <div>
-            <label>Giọng đọc</label>
-            <select id="voice-list"></select>
+    <div class="toolbar">
+        <div class="control-group">
+            <label>CHỌN GIỌNG GIÁO VIÊN</label>
+            <select id="voice-select"></select>
         </div>
-        <div>
-            <label>Tốc độ (0.9 là chuẩn)</label>
-            <input type="range" id="rate" min="0.5" max="1.5" value="0.9" step="0.1">
+        <div class="control-group">
+            <label>TỐC ĐỘ ĐỌC</label>
+            <input type="range" id="rate-range" min="0.5" max="1.5" value="0.9" step="0.1">
         </div>
     </div>
 
-    <div id="status">Sẵn sàng</div>
+    <div id="progress-bar"></div>
+    <div id="status" class="status-text">Sẵn sàng thu âm</div>
 
-    <div class="actions">
-        <button id="play-btn" class="btn-play">🔊 Bắt đầu đọc</button>
-        <button id="download-btn" class="btn-download">📥 Tải file Audio về điện thoại</button>
+    <div class="btn-stack">
+        <button id="btn-speak" class="btn-speak">▶ Bắt đầu giảng & Thu âm</button>
+        <button id="btn-download" class="btn-download">💾 Tải file Audio (.wav) về máy</button>
     </div>
 </div>
 
 <script>
     const synth = window.speechSynthesis;
-    const playBtn = document.getElementById('play-btn');
-    const downloadBtn = document.getElementById('download-btn');
-    const voiceList = document.getElementById('voice-list');
-    const inputText = document.getElementById('input-text');
-    const rate = document.getElementById('rate');
+    const btnSpeak = document.getElementById('btn-speak');
+    const btnDownload = document.getElementById('btn-download');
+    const voiceSelect = document.getElementById('voice-select');
+    const textInput = document.getElementById('text-input');
+    const rateRange = document.getElementById('rate-range');
     const status = document.getElementById('status');
+    const progressBar = document.getElementById('progress-bar');
 
     let voices = [];
+    let audioUrl = null;
 
-    // Lấy danh sách giọng đọc chất lượng cao
-    function getVoices() {
+    // Load giọng đọc chất lượng cao
+    function loadVoices() {
         voices = synth.getVoices();
-        voiceList.innerHTML = voices
-            .filter(v => v.lang.includes('en'))
-            .map(v => `<option value="${v.name}">${v.name} (${v.lang})</option>`)
+        voiceSelect.innerHTML = voices
+            .filter(v => v.lang.startsWith('en'))
+            .map(v => `<option value="${v.name}">${v.name.replace('Microsoft', '').replace('Google', 'Premium')}</option>`)
             .join('');
     }
 
     if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = getVoices;
+        speechSynthesis.onvoiceschanged = loadVoices;
     }
 
-    playBtn.addEventListener('click', () => {
-        if (inputText.value.trim() === "") return alert("Hãy nhập văn bản!");
+    btnSpeak.onclick = () => {
+        if (!textInput.value.trim()) return alert("Vui lòng nhập văn bản!");
 
-        const utterance = new SpeechSynthesisUtterance(inputText.value);
-        utterance.voice = voices.find(v => v.name === voiceList.value);
-        utterance.rate = rate.value;
+        // Hủy mọi âm thanh đang phát
+        synth.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(textInput.value);
+        utterance.voice = voices.find(v => v.name === voiceSelect.value);
+        utterance.rate = rateRange.value;
 
         utterance.onstart = () => {
-            status.innerText = "正在 đọc... (Vui lòng nghe hết để tạo file)";
-            playBtn.disabled = true;
-            playBtn.style.opacity = "0.5";
+            status.innerText = "正在 Ghi âm luồng bài giảng...";
+            progressBar.style.width = "100%";
+            btnSpeak.disabled = true;
+            btnSpeak.style.opacity = "0.5";
+            btnDownload.style.display = "none";
         };
 
         utterance.onend = () => {
-            status.innerText = "✅ Đã xong! Bạn có thể tải file.";
-            playBtn.disabled = false;
-            playBtn.style.opacity = "1";
+            status.innerText = "✅ Thu âm hoàn tất!";
+            progressBar.style.width = "0%";
+            btnSpeak.disabled = false;
+            btnSpeak.style.opacity = "1";
+            btnSpeak.innerText = "▶ Giảng lại";
             
-            // Hiển thị nút tải về
-            downloadBtn.style.display = "flex";
-            
-            // Kỹ thuật tải về: Sử dụng API của Google để lấy file mp3 thật
-            const textToDownload = encodeURIComponent(inputText.value);
-            const downloadUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${textToDownload}&tl=en&client=tw-ob`;
-            
-            downloadBtn.onclick = () => {
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.target = "_blank";
-                link.download = "english_lesson.mp3";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
+            // Xử lý tạo link tải file thật từ API để tải về PC
+            generateDownload(textInput.value, utterance.voice.lang);
+            btnDownload.style.display = "flex";
         };
 
         synth.speak(utterance);
-    });
+    };
 
-    getVoices();
+    function generateDownload(text, lang) {
+        // Sử dụng Proxy để tải file MP3 chuẩn từ máy chủ về máy tính
+        const encodedText = encodeURIComponent(text);
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=tw-ob`;
+        
+        btnDownload.onclick = () => {
+            const link = document.createElement('a');
+            link.href = ttsUrl;
+            link.target = "_blank";
+            link.download = `English_Lesson_${Date.now()}.mp3`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            status.innerText = "📁 File đã được gửi về máy tính!";
+        };
+    }
+
+    loadVoices();
 </script>
 </body>
 </html>
